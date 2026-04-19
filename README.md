@@ -3,25 +3,25 @@
 ## 1. Problem Statement
 
 In modern networks, malicious or suspicious hosts can disrupt communication by generating unwanted traffic. Traditional networks lack dynamic control to handle such threats.
-This project aims to **detect and block suspicious hosts dynamically using Software Defined Networking (SDN)** by installing flow rules in real time.
+
+This project implements a **Software Defined Networking (SDN)** solution to dynamically detect and block a suspicious host by installing flow rules in real time using a controller.
 
 ---
 
 ## 2. Objective
 
-* To implement an SDN-based network using Mininet
-* To monitor network traffic using a controller
-* To identify suspicious host behavior
-* To dynamically block malicious hosts
-* To allow normal traffic without interruption
+* Implement an SDN-based network using Mininet
+* Monitor traffic using a controller
+* Identify and block a suspicious host
+* Allow normal traffic without interruption
 
 ---
 
 ## 3. Tools & Technologies Used
 
-* **Mininet** – Network emulator for creating virtual topology
-* **POX Controller** – SDN controller for implementing logic
-* **OpenFlow Protocol** – Communication between switch and controller
+* **Mininet** – Network emulator
+* **POX Controller** – SDN controller
+* **OpenFlow Protocol** – Switch-controller communication
 * **Ubuntu Linux** – Development environment
 
 ---
@@ -43,23 +43,23 @@ h3 ----/
 
 ## 5. Working Principle
 
-1. When a packet arrives at the switch without a matching rule, it sends a **PacketIn** message to the controller
-2. The controller analyzes the packet
-3. If the source IP is **10.0.0.2**, it is marked as suspicious
-4. The controller installs a **flow rule with DROP action** in the switch
-5. The switch blocks all future packets from that host
+1. Switch sends a **PacketIn** message to the controller for unknown flows
+2. Controller inspects packet details
+3. If source IP = **10.0.0.2**, it is marked as suspicious
+4. Controller installs a **flow rule with DROP action**
+5. Switch blocks all future packets from that host
 6. Other hosts continue normal communication
 
 ---
 
-## 6. Controller Logic (Implementation)
+## 6. Controller Logic
 
-* Uses `_handle_PacketIn()` event handler
-* Implements **match-action flow rule**
+* Uses `_handle_PacketIn()` event
+* Implements **match–action flow rule**:
 
-  * Match: Source IP address
-  * Action: Drop packets
-* Uses learning switch logic for normal traffic forwarding
+  * Match: Source IP (`10.0.0.2`)
+  * Action: Drop
+* Uses learning switch logic for normal forwarding
 
 ---
 
@@ -67,7 +67,7 @@ h3 ----/
 
 ### Step 1: Start POX Controller
 
-```bash
+```
 cd ~/pox
 python3 pox.py host_block
 ```
@@ -76,7 +76,7 @@ python3 pox.py host_block
 
 ### Step 2: Start Mininet
 
-```bash
+```
 sudo mn --topo single,3 --controller remote
 ```
 
@@ -86,11 +86,11 @@ sudo mn --topo single,3 --controller remote
 
 #### Allowed Traffic
 
-```bash
+```
 h1 ping -c 3 h3
 ```
 
-**Expected Output:**
+Expected Output:
 
 ```
 0% packet loss
@@ -100,11 +100,11 @@ h1 ping -c 3 h3
 
 #### Blocked Traffic
 
-```bash
+```
 h2 ping -c 3 h1
 ```
 
-**Expected Output:**
+Expected Output:
 
 ```
 100% packet loss
@@ -116,58 +116,52 @@ h2 ping -c 3 h1
 
 To verify installed flow rules:
 
-```bash
+```
 sudo ovs-ofctl dump-flows s1
 ```
 
-**Observation:**
+Expected Output:
 
-* Flow entry exists for source IP `10.0.0.2`
-* Action: `DROP`
-* Confirms that blocking rule is installed in switch
-
----
-
-## 9. Performance Observation
-
-* Allowed hosts show low latency (~1–3 ms)
-* Blocked host shows **100% packet loss**
-* Demonstrates efficient filtering using SDN
-* No impact on normal traffic
+```
+nw_src=10.0.0.2 actions=drop
+```
 
 ---
 
-## 10. Results
+## 9. Results
 
-* Normal traffic successfully forwarded
-* Suspicious host dynamically blocked
-* Controller enforces security policies in real time
-* Network behavior changes dynamically based on rules
-
----
-
-## 11. Proof of Execution
-
-The following screenshots are included:
-
-* Controller running
-* Mininet topology
-* Allowed traffic output
-* Blocked traffic output
-* Controller log (blocking message)
-* Flow table output
+* Normal traffic is successfully forwarded
+* Suspicious host is blocked
+* Flow rules dynamically installed
+* Network behavior controlled by SDN controller
 
 ---
 
-## 12. Conclusion
+## 10. Proof of Execution
+
+### Controller Output
+
+![Controller](images/controller.png)
+
+### Ping Test (Allowed vs Blocked)
+
+![Ping Test](images/ping_test.png)
+
+### Flow Table (Blocking Rule)
+
+![Flow Table](images/flow_table.png)
+
+---
+
+## 11. Conclusion
 
 This project demonstrates how SDN enables centralized and dynamic control of network behavior.
-By using a controller, we can detect malicious activity and enforce security policies by installing flow rules directly in the network switch.
+By installing flow rules in the switch, the controller can enforce security policies and block malicious hosts effectively.
 
 ---
 
-## 13. References
+## 12. References
 
-* Mininet Official Documentation
-* POX Controller Documentation
-* OpenFlow Specification
+* https://mininet.org
+* https://github.com/noxrepo/pox
+* https://opennetworking.org
