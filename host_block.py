@@ -32,7 +32,7 @@ def _handle_PacketIn(event):
     ip = packet.find('ipv4')
 
     # -------------------------------
-    # 🚫 BLOCK LOGIC (FIREWALL)
+    # BLOCK LOGIC (FIREWALL)
     # -------------------------------
     if ip and str(ip.srcip) == blocked_ip:
         log.info("Blocking host %s", ip.srcip)
@@ -48,7 +48,7 @@ def _handle_PacketIn(event):
         return
 
     # -------------------------------
-    # 🔁 NORMAL LEARNING SWITCH LOGIC
+    # NORMAL LEARNING SWITCH LOGIC
     # -------------------------------
     if packet.dst in mac_to_port[dpid]:
         # Known destination → forward to correct port
